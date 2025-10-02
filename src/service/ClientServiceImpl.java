@@ -57,11 +57,21 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public List<Client> rechercherClientsParNom(String nom) {
-        return clientDAO.findAll().stream().filter(e -> e.equals(nom)).toList();
+        try{
+            return clientDAO.findAll().stream().filter(e -> e.equals(nom)).toList();
+        }catch (Exception e){
+            System.err.println("Erreur lors de chercher par nom le client: " + e.getMessage());
+            throw new RuntimeException("Impossible de chercher par nom les client", e);
+        }
     }
 
     @Override
     public List<Client> listerTousClients() {
-        return clientDAO.findAll();
+        try {
+            return clientDAO.findAll();
+        } catch (Exception e) {
+            System.err.println("Erreur lors de lister les client: " + e.getMessage());
+            throw new RuntimeException("Impossible de lister les client", e);
+        }
     }
 }

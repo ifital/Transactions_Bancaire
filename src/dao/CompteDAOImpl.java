@@ -51,6 +51,25 @@ public class CompteDAOImpl implements CompteDAO {
         }
         return null;
     }
+    @Override
+    public List<Compte> findByClientId(int idClient) {
+        List<Compte> comptes = new ArrayList<>();
+        String sql = "SELECT * FROM compte WHERE idClient = ?";
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, idClient);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                comptes.add(mapCompte(rs));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return comptes;
+    }
 
     @Override
     public List<Compte> findAll() {
