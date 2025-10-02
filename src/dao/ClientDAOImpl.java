@@ -6,6 +6,7 @@ import entity.Client;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ClientDAOImpl implements ClientDAO {
 
@@ -24,18 +25,18 @@ public class ClientDAOImpl implements ClientDAO {
     }
 
     @Override
-    public Client findById(int id) {
+    public Optional<Client> findById(int id) {
         String sql = "SELECT * FROM client WHERE id = ?";
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return new Client(
+                return Optional.of(new Client(
                         rs.getInt("id"),
                         rs.getString("nom"),
                         rs.getString("email")
-                );
+                ));
             }
         } catch (SQLException e) {
             e.printStackTrace();
