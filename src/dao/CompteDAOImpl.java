@@ -13,7 +13,7 @@ public class CompteDAOImpl implements CompteDAO {
 
     @Override
     public void create(Compte compte) {
-        String sql = "INSERT INTO compte (id, numero, solde, idClient, type, extra) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO compte (id, numero, solde, idclient, typecompte, decouvertautorise, tauxinteret) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -25,9 +25,11 @@ public class CompteDAOImpl implements CompteDAO {
             if (compte instanceof CompteCourant cc) {
                 stmt.setString(5, "COURANT");
                 stmt.setDouble(6, cc.getDecouvertAutorise());
+                stmt.setNull(7, Types.NUMERIC); // tauxinteret nul pour courant
             } else if (compte instanceof CompteEpargne ce) {
                 stmt.setString(5, "EPARGNE");
-                stmt.setDouble(6, ce.getTauxInteret());
+                stmt.setNull(6, Types.NUMERIC); // découvert nul pour épargne
+                stmt.setDouble(7, ce.getTauxInteret());
             }
 
             stmt.executeUpdate();
@@ -51,10 +53,11 @@ public class CompteDAOImpl implements CompteDAO {
         }
         return null;
     }
+
     @Override
     public List<Compte> findByClientId(int idClient) {
         List<Compte> comptes = new ArrayList<>();
-        String sql = "SELECT * FROM compte WHERE idClient = ?";
+        String sql = "SELECT * FROM compte WHERE idclient = ?";
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -89,18 +92,20 @@ public class CompteDAOImpl implements CompteDAO {
 
     @Override
     public void update(Compte compte) {
-        String sql = "UPDATE compte SET solde = ?, extra = ? WHERE id = ?";
+        String sql = "UPDATE compte SET solde = ?, decouvertautorise = ?, tauxinteret = ? WHERE id = ?";
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setDouble(1, compte.getSolde());
 
             if (compte instanceof CompteCourant cc) {
                 stmt.setDouble(2, cc.getDecouvertAutorise());
+                stmt.setNull(3, Types.NUMERIC);
             } else if (compte instanceof CompteEpargne ce) {
-                stmt.setDouble(2, ce.getTauxInteret());
+                stmt.setNull(2, Types.NUMERIC);
+                stmt.setDouble(3, ce.getTauxInteret());
             }
 
-            stmt.setInt(3, compte.getId());
+            stmt.setInt(4, compte.getId());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -120,22 +125,22 @@ public class CompteDAOImpl implements CompteDAO {
     }
 
     private Compte mapCompte(ResultSet rs) throws SQLException {
-        String type = rs.getString("type");
-        if ("COURANT".equals(type)) {
+        String type = rs.getString("typecompte");
+        if ("COURANT".equalsIgnoreCase(type)) {
             return new CompteCourant(
                     rs.getInt("id"),
                     rs.getString("numero"),
                     rs.getDouble("solde"),
-                    rs.getInt("idClient"),
-                    rs.getDouble("extra")
+                    rs.getInt("idclient"),
+                    rs.getDouble("decouvertautorise")
             );
         } else {
             return new CompteEpargne(
                     rs.getInt("id"),
                     rs.getString("numero"),
                     rs.getDouble("solde"),
-                    rs.getInt("idClient"),
-                    rs.getDouble("extra")
+                    rs.getInt("idclient"),
+                    rs.getDouble("tauxinteret")
             );
         }
     }
