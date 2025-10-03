@@ -1,20 +1,14 @@
-import java.sql.Connection;
-import config.DatabaseConfig;
+import ui.MainUI;
 
-import java.sql.SQLException;
-
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
     public static void main(String[] args) {
-        try (Connection conn = DatabaseConfig.getConnection()) {
-            if (conn != null && !conn.isClosed()) {
-                System.out.println("Connexion réussie à la base de données !");
-            } else {
-                System.out.println("Échec de la connexion.");
-            }
-        } catch (SQLException e) {
-            System.out.println("Erreur lors de la connexion : " + e.getMessage());
+        System.out.println("Initialisation de l'application...");
+
+        try {
+            MainUI ui = new MainUI();
+            ui.demarrer();
+        } catch (Exception e) {
+            System.err.println("Erreur fatale lors du démarrage: " + e.getMessage());
             e.printStackTrace();
         }
     }
