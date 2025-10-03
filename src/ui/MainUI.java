@@ -16,6 +16,7 @@ import util.ValidationUtil;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.Scanner;
 
 public class MainUI {
 
@@ -31,6 +32,8 @@ public class MainUI {
         this.transactionService = new TransactionServiceImpl(new TransactionDAOImpl());
         this.rapportService = new RapportService(new ClientDAOImpl(), new CompteDAOImpl(), new TransactionDAOImpl());
     }
+
+    private static final Scanner scanner = new Scanner(System.in);
 
     public void demarrer() {
         int choix;
@@ -69,11 +72,11 @@ public class MainUI {
 
         switch (choix) {
             case 1 -> {
-                int id = ValidationUtil.lireInt("ID : ");
+                // Plus besoin de demander l'ID - il sera généré automatiquement
                 String nom = ValidationUtil.lireString("Nom : ");
                 String email = ValidationUtil.lireEmail("Email : ");
-                clientService.ajouterClient(new Client(id, nom, email));
-                System.out.println("✅ Client ajouté !");
+                clientService.ajouterClient(new Client(0, nom, email));
+                System.out.println("✅ Client ajouté avec succès !");
             }
             case 2 -> {
                 int id = ValidationUtil.lireInt("ID du client à modifier : ");
@@ -94,7 +97,12 @@ public class MainUI {
             }
             case 4 -> {
                 System.out.println("\n--- Liste des clients ---");
-                clientService.listerTousClients().forEach(System.out::println);
+                var clients = clientService.listerTousClients();
+                if (clients.isEmpty()) {
+                    System.out.println("❌ Aucun client enregistré.");
+                } else {
+                    clients.forEach(System.out::println);
+                }
             }
             case 5 -> {
                 String nom = ValidationUtil.lireString("Nom à rechercher : ");
@@ -105,7 +113,7 @@ public class MainUI {
                     clients.forEach(System.out::println);
                 }
             }
-            case 0 ->{
+            case 0 -> {
                 return;
             }
             default -> System.out.println("Choix invalide !");
@@ -127,22 +135,22 @@ public class MainUI {
 
         switch (choix) {
             case 1 -> {
-                int id = ValidationUtil.lireInt("ID : ");
+                // Plus besoin de demander l'ID
                 String numero = ValidationUtil.lireString("Numéro : ");
-                double solde = ValidationUtil.lireDouble("Solde : ");
+                double solde = ValidationUtil.lireDouble("Solde initial : ");
                 int idClient = ValidationUtil.lireInt("ID Client : ");
                 double decouvert = ValidationUtil.lireDouble("Découvert autorisé : ");
-                compteService.creerCompte(new CompteCourant(id, numero, solde, idClient, decouvert));
-                System.out.println("✅ Compte courant créé !");
+                compteService.creerCompte(new CompteCourant(0, numero, solde, idClient, decouvert));
+                System.out.println("✅ Compte courant créé avec succès !");
             }
             case 2 -> {
-                int id = ValidationUtil.lireInt("ID : ");
+                // Plus besoin de demander l'ID
                 String numero = ValidationUtil.lireString("Numéro : ");
-                double solde = ValidationUtil.lireDouble("Solde : ");
+                double solde = ValidationUtil.lireDouble("Solde initial : ");
                 int idClient = ValidationUtil.lireInt("ID Client : ");
-                double taux = ValidationUtil.lireDouble("Taux intérêt : ");
-                compteService.creerCompte(new CompteEpargne(id, numero, solde, idClient, taux));
-                System.out.println("✅ Compte épargne créé !");
+                double taux = ValidationUtil.lireDouble("Taux intérêt (%) : ");
+                compteService.creerCompte(new CompteEpargne(0, numero, solde, idClient, taux));
+                System.out.println("✅ Compte épargne créé avec succès !");
             }
             case 3 -> {
                 int idClient = ValidationUtil.lireInt("ID Client : ");
@@ -150,6 +158,7 @@ public class MainUI {
                 if (comptes.isEmpty()) {
                     System.out.println("❌ Aucun compte trouvé pour ce client.");
                 } else {
+                    System.out.println("\n--- Comptes du client ---");
                     comptes.forEach(System.out::println);
                 }
             }
@@ -157,7 +166,7 @@ public class MainUI {
                 String numero = ValidationUtil.lireString("Numéro du compte : ");
                 Optional<entity.Compte> compte = compteService.rechercherCompteParNumero(numero);
                 if (compte.isPresent()) {
-                    System.out.println(compte.get());
+                    System.out.println("Compte trouvé : " + compte.get());
                 } else {
                     System.out.println("❌ Compte introuvable.");
                 }
@@ -178,7 +187,7 @@ public class MainUI {
                     System.out.println("❌ Aucun compte trouvé.");
                 }
             }
-            case 0 ->{
+            case 0 -> {
                 return;
             }
             default -> System.out.println("Choix invalide !");
@@ -197,15 +206,16 @@ public class MainUI {
 
         switch (choix) {
             case 1 -> {
-                int id = ValidationUtil.lireInt("ID : ");
+                // Plus besoin de demander l'ID
                 double montant = ValidationUtil.lireDouble("Montant : ");
-                String type = ValidationUtil.lireTypeTransaction("Type (DEPOT/RETRAIT) : ");
+                String type = ValidationUtil.lireTypeTransaction("Type (VIREMENT/VERSEMENT/RETRAIT) : ");
                 String lieu = ValidationUtil.lireString("Lieu : ");
                 int idCompte = ValidationUtil.lireInt("ID Compte : ");
                 LocalDate date = LocalDate.now();
-                Transaction t = new Transaction(id, date, montant, TypeTransaction.valueOf(type.toUpperCase()), lieu, idCompte);
+
+                Transaction t = new Transaction(0, date, montant, TypeTransaction.valueOf(type.toUpperCase()), lieu, idCompte);
                 transactionService.enregistrerTransaction(t);
-                System.out.println("✅ Transaction enregistrée !");
+                System.out.println("✅ Transaction enregistrée avec succès !");
             }
             case 2 -> {
                 int idCompte = ValidationUtil.lireInt("ID Compte : ");
@@ -213,6 +223,7 @@ public class MainUI {
                 if (transactions.isEmpty()) {
                     System.out.println("❌ Aucune transaction trouvée pour ce compte.");
                 } else {
+                    System.out.println("\n--- Transactions du compte " + idCompte + " ---");
                     transactions.forEach(System.out::println);
                 }
             }
@@ -220,20 +231,23 @@ public class MainUI {
                 int idCompte = ValidationUtil.lireInt("ID Compte : ");
                 System.out.println("Laissez vide pour ne pas filtrer sur un critère");
 
-                String montantMinStr = ValidationUtil.lireString("Montant minimum (ou vide) : ");
+                System.out.print("Montant minimum (ou Entrée pour ignorer) : ");
+                String montantMinStr = scanner.nextLine();
                 Double montantMin = montantMinStr.isEmpty() ? null : Double.parseDouble(montantMinStr);
 
-                String montantMaxStr = ValidationUtil.lireString("Montant maximum (ou vide) : ");
+                System.out.print("Montant maximum (ou Entrée pour ignorer) : ");
+                String montantMaxStr = scanner.nextLine();
                 Double montantMax = montantMaxStr.isEmpty() ? null : Double.parseDouble(montantMaxStr);
 
                 var transactions = transactionService.filtrerTransactions(idCompte, montantMin, montantMax, null, null, null);
                 if (transactions.isEmpty()) {
                     System.out.println("❌ Aucune transaction correspondant aux critères.");
                 } else {
+                    System.out.println("\n--- Transactions filtrées ---");
                     transactions.forEach(System.out::println);
                 }
             }
-            case 0 ->{
+            case 0 -> {
                 return;
             }
             default -> System.out.println("Choix invalide !");
@@ -254,12 +268,22 @@ public class MainUI {
         switch (choix) {
             case 1 -> {
                 System.out.println("\n--- Top 5 Clients ---");
-                rapportService.top5Clients().forEach(System.out::println);
+                var topClients = rapportService.top5Clients();
+                if (topClients.isEmpty()) {
+                    System.out.println("❌ Aucun client disponible.");
+                } else {
+                    topClients.forEach(System.out::println);
+                }
             }
             case 2 -> {
                 System.out.println("\n--- Rapport Mensuel ---");
-                rapportService.rapportMensuel().forEach((type, count) ->
-                        System.out.println(type + " : " + count));
+                var rapport = rapportService.rapportMensuel();
+                if (rapport.isEmpty()) {
+                    System.out.println("❌ Aucune transaction ce mois-ci.");
+                } else {
+                    rapport.forEach((type, count) ->
+                            System.out.println(type + " : " + count + " transaction(s)"));
+                }
             }
             case 3 -> {
                 System.out.println("\n--- Transactions Suspectes ---");
@@ -267,6 +291,7 @@ public class MainUI {
                 if (transactions.isEmpty()) {
                     System.out.println("✅ Aucune transaction suspecte détectée.");
                 } else {
+                    System.out.println("⚠️ " + transactions.size() + " transaction(s) suspecte(s) détectée(s) :");
                     transactions.forEach(System.out::println);
                 }
             }
@@ -277,6 +302,7 @@ public class MainUI {
                 if (comptes.isEmpty()) {
                     System.out.println("✅ Aucun compte inactif.");
                 } else {
+                    System.out.println("⚠️ " + comptes.size() + " compte(s) inactif(s) depuis 6 mois :");
                     comptes.forEach(System.out::println);
                 }
             }

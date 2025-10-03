@@ -12,12 +12,11 @@
 
         @Override
         public void create(Client client) {
-            String sql = "INSERT INTO client (id, nom, email) VALUES (?, ?, ?)";
+            String sql = "INSERT INTO client (nom, email) VALUES (?, ?)";
             try (Connection conn = DatabaseConfig.getConnection();
                  PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, client.id());
-                stmt.setString(2, client.nom());
-                stmt.setString(3, client.email());
+                stmt.setString(1, client.nom());
+                stmt.setString(2, client.email());
                 stmt.executeUpdate();
             } catch (SQLException e) {
                 e.printStackTrace();

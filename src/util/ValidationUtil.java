@@ -74,7 +74,7 @@ public class ValidationUtil {
         while (true) {
             System.out.print(message);
             type = scanner.nextLine().trim().toUpperCase();
-            if (type.equals("DEPOT") || type.equals("RETRAIT")) {
+            if (type.equals("VIREMENT") || type.equals("RETRAIT") || type.equals("VERESEMENT")) {
                 return type;
             } else {
                 System.out.println("❌ Type invalide, veuillez entrer DEPOT ou RETRAIT.");

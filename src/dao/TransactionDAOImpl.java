@@ -13,15 +13,14 @@ public class TransactionDAOImpl implements TransactionDAO {
 
     @Override
     public void create(Transaction transaction) {
-        String sql = "INSERT INTO transaction (id, date, montant, type, lieu, idCompte) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO transaction (date, montant, type, lieu, idCompte) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, transaction.id());
-            stmt.setDate(2, Date.valueOf(transaction.date()));
-            stmt.setDouble(3, transaction.montant());
-            stmt.setString(4, transaction.type().name());
-            stmt.setString(5, transaction.lieu());
-            stmt.setInt(6, transaction.idCompte());
+            stmt.setDate(1, Date.valueOf(transaction.date()));
+            stmt.setDouble(2, transaction.montant());
+            stmt.setString(3, transaction.type().name());
+            stmt.setString(4, transaction.lieu());
+            stmt.setInt(5, transaction.idCompte());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

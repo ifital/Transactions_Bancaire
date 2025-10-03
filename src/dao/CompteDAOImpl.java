@@ -13,23 +13,22 @@ public class CompteDAOImpl implements CompteDAO {
 
     @Override
     public void create(Compte compte) {
-        String sql = "INSERT INTO compte (id, numero, solde, idclient, typecompte, decouvertautorise, tauxinteret) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO compte (numero, solde, idclient, typecompte, decouvertautorise, tauxinteret) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, compte.getId());
-            stmt.setString(2, compte.getNumero());
-            stmt.setDouble(3, compte.getSolde());
-            stmt.setInt(4, compte.getIdClient());
+            stmt.setString(1, compte.getNumero());
+            stmt.setDouble(2, compte.getSolde());
+            stmt.setInt(3, compte.getIdClient());
 
             if (compte instanceof CompteCourant cc) {
-                stmt.setString(5, "COURANT");
-                stmt.setDouble(6, cc.getDecouvertAutorise());
-                stmt.setNull(7, Types.NUMERIC); // tauxinteret nul pour courant
+                stmt.setString(4, "COURANT");
+                stmt.setDouble(5, cc.getDecouvertAutorise());
+                stmt.setNull(6, Types.NUMERIC); // tauxinteret nul pour courant
             } else if (compte instanceof CompteEpargne ce) {
-                stmt.setString(5, "EPARGNE");
-                stmt.setNull(6, Types.NUMERIC); // découvert nul pour épargne
-                stmt.setDouble(7, ce.getTauxInteret());
+                stmt.setString(4, "EPARGNE");
+                stmt.setNull(5, Types.NUMERIC); // découvert nul pour épargne
+                stmt.setDouble(6    , ce.getTauxInteret());
             }
 
             stmt.executeUpdate();
